@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Linux on Brian T. Saunders</title>
-    <link>https://briantsaunders.github.io/tags/linux/</link>
-    <description>Recent content in Linux on Brian T. Saunders</description>
+    <title>Vrf on Brian T. Saunders</title>
+    <link>https://briantsaunders.github.io/tags/vrf/</link>
+    <description>Recent content in Vrf on Brian T. Saunders</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
     <lastBuildDate>Sat, 25 May 2019 08:55:50 -0500</lastBuildDate>
     
-	<atom:link href="https://briantsaunders.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://briantsaunders.github.io/tags/vrf/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       
       <guid>https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/</guid>
       <description>&lt;p&gt;In this post I&amp;rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in &lt;a href=&#34;https://github.com/briantsaunders/linux-vrf-example-python-script&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Creating a VXLAN Tunnel in Linux with Python</title>
-      <link>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</link>
-      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</guid>
-      <description>&lt;p&gt;In this post I&amp;rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in &lt;a href=&#34;https://github.com/briantsaunders/linux-vxlan-tunnel-example-python-script&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>
