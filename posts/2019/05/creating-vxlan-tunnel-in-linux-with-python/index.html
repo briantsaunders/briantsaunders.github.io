@@ -26,7 +26,7 @@
 
 
 
-<meta itemprop="keywords" content="vxlan,python,linux,network," />
+<meta itemprop="keywords" content="vxlan,python,linux,network,frrouting,bgp," />
 
 
   <link rel="stylesheet" href="/css/style.css" media="all" />
@@ -85,6 +85,18 @@
             network
           </a>&nbsp;
         </li>
+        <li class="article-meta-tags">
+          <a href="/tags/frrouting/">
+            <i class="fas fa-tag"></i>
+            frrouting
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/bgp/">
+            <i class="fas fa-tag"></i>
+            bgp
+          </a>&nbsp;
+        </li>
       </ul>
       
 <aside class="toc">
@@ -122,7 +134,7 @@
 
 <p><img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_environment.PNG" alt="Environment" /></p>
 
-<p>This will allow the hosts connected to enp0s9 talk to each other as if they are directly connected.  In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational.  The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other.  Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.</p>
+<p>This will allow the hosts connected to eth2 talk to each other as if they are directly connected.  In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational.  The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other.  Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.</p>
 
 <h3 id="prerequisites">Prerequisites</h3>
 
@@ -145,12 +157,12 @@
 
 <p>Create</p>
 
-<pre><code>sudo ip link set enp0s9 up
+<pre><code>sudo ip link set eth2 up
 sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.2 remote 192.168.0.5 nolearning
 sudo ip link set vxlan100 up
 sudo brctl addbr br100
 sudo brctl addif br100 vxlan100
-sudo brctl addif br100 enp0s9
+sudo brctl addif br100 eth2
 sudo brctl stp br100 off
 sudo ip link set br100 up
 </code></pre>
@@ -165,12 +177,12 @@ sudo ip link delete br100
 
 <p>Create</p>
 
-<pre><code>sudo ip link set enp0s9 up
+<pre><code>sudo ip link set eth2 up
 sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.5 remote 192.168.0.2 nolearning
 sudo ip link set vxlan100 up
 sudo brctl addbr br100
 sudo brctl addif br100 vxlan100
-sudo brctl addif br100 enp0s9
+sudo brctl addif br100 eth2
 sudo brctl stp br100 off
 sudo ip link set br100 up
 </code></pre>
@@ -216,8 +228,8 @@ sudo ip link delete br100
 <pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
 
 <span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
     <span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vxlan&#34;</span><span class="p">,</span>
     <span class="n">ifname</span><span class="o">=</span><span class="n">f</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">,</span>
@@ -231,7 +243,7 @@ sudo ip link delete br100
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;bridge&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;br100&#34;</span><span class="p">)</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></code></pre></td></tr></table>
 </div>
@@ -286,8 +298,8 @@ sudo ip link delete br100
 <pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
 
 <span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
     <span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vxlan&#34;</span><span class="p">,</span>
     <span class="n">ifname</span><span class="o">=</span><span class="n">f</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">,</span>
@@ -301,7 +313,7 @@ sudo ip link delete br100
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;bridge&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;br100&#34;</span><span class="p">)</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;enp0s9&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
 <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></code></pre></td></tr></table>
 </div>
@@ -343,17 +355,17 @@ vagrant@site1server:~$
 
 <h4 id="pcap">PCAP</h4>
 
-<p>site1router enp0s9 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_enp0s9.PNG" alt="enp0s9" /></p>
+<p>site1router eth2 interface
+<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth2.PNG" alt="eth2" /></p>
 
 <p>site1router vxlan100 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG" alt="enp0s9" /></p>
+<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG" alt="vxlan100" /></p>
 
 <p>site1router br100 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG" alt="enp0s9" /></p>
+<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG" alt="br100" /></p>
 
-<p>site1router enp0s8 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_enp0s8.PNG" alt="enp0s9" /></p>
+<p>site1router eth1 interface
+<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth1.PNG" alt="eth1" /></p>
 
 <h3 id="helpful-references">Helpful References</h3>
 
