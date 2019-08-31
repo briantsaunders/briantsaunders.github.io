@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
-    <lastBuildDate>Sat, 25 May 2019 08:55:50 -0500</lastBuildDate>
+    <lastBuildDate>Mon, 19 Aug 2019 20:02:49 -0500</lastBuildDate>
     
 	<atom:link href="https://briantsaunders.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>My Flask API Setup</title>
+      <link>https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/</link>
+      <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
+      
+      <guid>https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/</guid>
+      <description>Typically when deploying python API&amp;rsquo;s I go with Flask. Over the years I&amp;rsquo;ve tried out a few python web frameworks but continually find myself coming back to Flask. It&amp;rsquo;s hard not to like with it&amp;rsquo;s simple setup and great documentation. Plus there&amp;rsquo;s plenty of examples out there on the internet on how to deploy Flask and use it for a variety of scenarios.
+It&amp;rsquo;s considered a micro framework, so it comes with the bare bones to make a web framework run but leaves you the flexibility to pick and choose the libraries to add on that make the most sense for your app.</description>
+    </item>
     
     <item>
       <title>Creating Vrfs in Linux With Python</title>
