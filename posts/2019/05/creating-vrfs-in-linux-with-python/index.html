@@ -100,7 +100,7 @@
 </aside>
       <p>In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in <a href="https://github.com/briantsaunders/linux-vrf-example-python-script">github</a>.</p>
 <p>Here&rsquo;s our environment:</p>
-<p><img src="/2019/05/creating_vrfs_in_linux_with_python_environment.png" alt="Environment"></p>
+<p><img src="/img/2019/05/creating_vrfs_in_linux_with_python_environment.png" alt="Environment"></p>
 <p>Prior to us creating the VRFs all servers connected to site1router will be able to talk to each other.  In this post we will create two VRFs, vrf1 and vrf2.  On site1router we will then associate interfaces eth1 and eth2 with vrf1 and interfaces eth3 and eth4 with vrf2.  Once the interface is associated with the vrf the network configured on the interface will be contained to their respective vrf route table.  This will prevent servers on seperate VRFs from being able to communicate.</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <p>If you&rsquo;re following along via the vagrant environment these are handled for you but if you&rsquo;re wanting to perform this on your own you need to ensure that the following prerequisites are met.</p>

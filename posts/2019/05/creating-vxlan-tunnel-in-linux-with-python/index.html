@@ -113,7 +113,7 @@
 </aside>
       <p>In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in <a href="https://github.com/briantsaunders/linux-vxlan-tunnel-example-python-script">github</a>.</p>
 <p>Here&rsquo;s our environment and we&rsquo;re going to form a VXLAN tunnel between the site1router and site2router.</p>
-<p><img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_environment.PNG" alt="Environment"></p>
+<p><img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_environment.PNG" alt="Environment"></p>
 <p>This will allow the hosts connected to eth2 talk to each other as if they are directly connected.  In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational.  The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other.  Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <p>On the linux host that will be forming the VXLAN tunnel you need to make sure you have the following installed.</p>
@@ -304,13 +304,13 @@ rtt min/avg/max/mdev = 1.246/1.246/1.246/0.000 ms
 vagrant@site1server:~$
 </code></pre><h4 id="pcap">PCAP</h4>
 <p>site1router eth2 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth2.PNG" alt="eth2"></p>
+<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth2.PNG" alt="eth2"></p>
 <p>site1router vxlan100 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG" alt="vxlan100"></p>
+<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG" alt="vxlan100"></p>
 <p>site1router br100 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG" alt="br100"></p>
+<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG" alt="br100"></p>
 <p>site1router eth1 interface
-<img src="/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth1.PNG" alt="eth1"></p>
+<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth1.PNG" alt="eth1"></p>
 <h3 id="helpful-references">Helpful References</h3>
 <p>I couldn&rsquo;t have created this post without the following helpful sites.</p>
 <ul>
