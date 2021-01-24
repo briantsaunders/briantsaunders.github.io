@@ -17,12 +17,9 @@ It&rsquo;s considered a micro framework, so it comes with the bare bones to make
   <meta property="og:url" content="https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-<meta itemprop="name" content="My Flask API Setup">
+  <meta name="generator" content="Hugo 0.80.0" /><meta itemprop="name" content="My Flask API Setup">
 <meta itemprop="description" content="Typically when deploying python API&rsquo;s I go with Flask. Over the years I&rsquo;ve tried out a few python web frameworks but continually find myself coming back to Flask. It&rsquo;s hard not to like with it&rsquo;s simple setup and great documentation. Plus there&rsquo;s plenty of examples out there on the internet on how to deploy Flask and use it for a variety of scenarios.
 It&rsquo;s considered a micro framework, so it comes with the bare bones to make a web framework run but leaves you the flexibility to pick and choose the libraries to add on that make the most sense for your app.">
-
-
 <meta itemprop="datePublished" content="2019-08-19T20:02:49-05:00" />
 <meta itemprop="dateModified" content="2019-08-19T20:02:49-05:00" />
 <meta itemprop="wordCount" content="272">
@@ -96,18 +93,11 @@ It&rsquo;s considered a micro framework, so it comes with the bare bones to make
         </li>
       </ul>
       
-      
-
-<p>Typically when deploying python API&rsquo;s I go with <a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a>.  Over the years I&rsquo;ve tried out a few python web frameworks but continually find myself coming back to Flask.  It&rsquo;s hard not to like with it&rsquo;s simple setup and great documentation.  Plus there&rsquo;s plenty of examples out there on the internet on how to deploy Flask and use it for a variety of scenarios.</p>
-
+      <p>Typically when deploying python API&rsquo;s I go with <a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a>.  Over the years I&rsquo;ve tried out a few python web frameworks but continually find myself coming back to Flask.  It&rsquo;s hard not to like with it&rsquo;s simple setup and great documentation.  Plus there&rsquo;s plenty of examples out there on the internet on how to deploy Flask and use it for a variety of scenarios.</p>
 <p>It&rsquo;s considered a micro framework, so it comes with the bare bones to make a web framework run but leaves you the flexibility to pick and choose the libraries to add on that make the most sense for your app.  When developing REST API&rsquo;s I like using <a href="https://github.com/marshmallow-code/marshmallow">marshmallow</a>, <a href="https://github.com/marshmallow-code/webargs">webargs</a>, and <a href="https://github.com/marshmallow-code/apispec">apispec</a>.</p>
-
 <p>I recently came across <a href="https://github.com/jmcarp/flask-apispec">flask-apispec</a> that bundles all these libraries together and bolts onto the Flask framework.  It has now become my go to when developing in Flask.  Instead of having to account for marshmallow, webargs, and apispec seperately it neatly integrates all three into Flask and creates a cleaner experience.  Plus because of the integrations it makes creating an <a href="https://swagger.io/docs/specification/about/">open api specification</a> easier and handles creation of the swagger documentation for you.</p>
-
 <h3 id="example">Example</h3>
-
 <p><a href="https://github.com/briantsaunders/flask-vrfs-api">EXAMPLE GITHUB REPO</a></p>
-
 <p>I&rsquo;m a visual learner so it&rsquo;s helpful for me to see an example while also reading about it so I created a simple API demonstrating my setup.  This example is meant to run in linux and the API allows you to GET, POST, and DELETE <a href="https://www.kernel.org/doc/Documentation/networking/vrf.txt">VRFs</a> within linux.  Included in the repo is a Vagrant file that will allow you to run the app on your machine.  Check out the repo for instructions on getting it up and running with vagrant.</p>
 
     </article>

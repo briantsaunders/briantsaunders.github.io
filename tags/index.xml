@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Brian T. Saunders</title>
@@ -7,13 +7,9 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
-    <lastBuildDate>Mon, 19 Aug 2019 20:02:49 -0500</lastBuildDate>
-    
-	<atom:link href="https://briantsaunders.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 19 Aug 2019 20:02:49 -0500</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Api</title>
+      <title>api</title>
       <link>https://briantsaunders.github.io/tags/api/</link>
       <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
       
@@ -22,16 +18,7 @@
     </item>
     
     <item>
-      <title>Bgp</title>
-      <link>https://briantsaunders.github.io/tags/bgp/</link>
-      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/tags/bgp/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Flask</title>
+      <title>flask</title>
       <link>https://briantsaunders.github.io/tags/flask/</link>
       <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
       
@@ -40,25 +27,7 @@
     </item>
     
     <item>
-      <title>Frrouting</title>
-      <link>https://briantsaunders.github.io/tags/frrouting/</link>
-      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/tags/frrouting/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Linux</title>
-      <link>https://briantsaunders.github.io/tags/linux/</link>
-      <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/tags/linux/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Microservice</title>
+      <title>microservice</title>
       <link>https://briantsaunders.github.io/tags/microservice/</link>
       <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
       
@@ -67,16 +36,7 @@
     </item>
     
     <item>
-      <title>Network</title>
-      <link>https://briantsaunders.github.io/tags/network/</link>
-      <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/tags/network/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Python</title>
+      <title>python</title>
       <link>https://briantsaunders.github.io/tags/python/</link>
       <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
       
@@ -85,7 +45,7 @@
     </item>
     
     <item>
-      <title>Rest</title>
+      <title>rest</title>
       <link>https://briantsaunders.github.io/tags/rest/</link>
       <pubDate>Mon, 19 Aug 2019 20:02:49 -0500</pubDate>
       
@@ -94,7 +54,25 @@
     </item>
     
     <item>
-      <title>Vrf</title>
+      <title>linux</title>
+      <link>https://briantsaunders.github.io/tags/linux/</link>
+      <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>network</title>
+      <link>https://briantsaunders.github.io/tags/network/</link>
+      <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/network/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>vrf</title>
       <link>https://briantsaunders.github.io/tags/vrf/</link>
       <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
       
@@ -103,7 +81,25 @@
     </item>
     
     <item>
-      <title>Vxlan</title>
+      <title>bgp</title>
+      <link>https://briantsaunders.github.io/tags/bgp/</link>
+      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/bgp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>frrouting</title>
+      <link>https://briantsaunders.github.io/tags/frrouting/</link>
+      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/frrouting/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>vxlan</title>
       <link>https://briantsaunders.github.io/tags/vxlan/</link>
       <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
       

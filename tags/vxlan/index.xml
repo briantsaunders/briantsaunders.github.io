@@ -1,17 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Vxlan on Brian T. Saunders</title>
+    <title>vxlan on Brian T. Saunders</title>
     <link>https://briantsaunders.github.io/tags/vxlan/</link>
-    <description>Recent content in Vxlan on Brian T. Saunders</description>
+    <description>Recent content in vxlan on Brian T. Saunders</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
-    <lastBuildDate>Tue, 07 May 2019 05:28:48 -0500</lastBuildDate>
-    
-	<atom:link href="https://briantsaunders.github.io/tags/vxlan/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Tue, 07 May 2019 05:28:48 -0500</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/vxlan/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Creating a VXLAN Tunnel in Linux with Python</title>
       <link>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</link>
