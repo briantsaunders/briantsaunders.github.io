@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
-    <lastBuildDate>Mon, 19 Aug 2019 20:02:49 -0500</lastBuildDate><atom:link href="https://briantsaunders.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 05 Feb 2021 15:47:05 -0600</lastBuildDate><atom:link href="https://briantsaunders.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Working with the Ansible Provisioner for Vagrant Boxes</title>
+      <link>https://briantsaunders.github.io/posts/2021/02/working-with-the-ansible-provisioner-for-vagrant-boxes/</link>
+      <pubDate>Fri, 05 Feb 2021 15:47:05 -0600</pubDate>
+      
+      <guid>https://briantsaunders.github.io/posts/2021/02/working-with-the-ansible-provisioner-for-vagrant-boxes/</guid>
+      <description>I&amp;rsquo;ve been working with vagrant boxes for quite awhile now. I usually use them for development environments or creating lab environments for testing various network functions (i.e. BGP EVPN). Often times when I&amp;rsquo;m using a vagrant box I need to get it in a certain state before it&amp;rsquo;s ready for me to begin using. In the situation of creating lab environments I may need to install FRRouting on the vagrant box and then apply a configuration.</description>
+    </item>
+    
     <item>
       <title>My Flask API Setup</title>
       <link>https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/</link>

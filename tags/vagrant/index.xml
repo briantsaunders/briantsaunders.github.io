@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>frrouting on Brian T. Saunders</title>
-    <link>https://briantsaunders.github.io/tags/frrouting/</link>
-    <description>Recent content in frrouting on Brian T. Saunders</description>
+    <title>vagrant on Brian T. Saunders</title>
+    <link>https://briantsaunders.github.io/tags/vagrant/</link>
+    <description>Recent content in vagrant on Brian T. Saunders</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
-    <lastBuildDate>Fri, 05 Feb 2021 15:47:05 -0600</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/frrouting/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 05 Feb 2021 15:47:05 -0600</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/vagrant/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Working with the Ansible Provisioner for Vagrant Boxes</title>
       <link>https://briantsaunders.github.io/posts/2021/02/working-with-the-ansible-provisioner-for-vagrant-boxes/</link>
@@ -15,15 +15,6 @@
       
       <guid>https://briantsaunders.github.io/posts/2021/02/working-with-the-ansible-provisioner-for-vagrant-boxes/</guid>
       <description>I&amp;rsquo;ve been working with vagrant boxes for quite awhile now. I usually use them for development environments or creating lab environments for testing various network functions (i.e. BGP EVPN). Often times when I&amp;rsquo;m using a vagrant box I need to get it in a certain state before it&amp;rsquo;s ready for me to begin using. In the situation of creating lab environments I may need to install FRRouting on the vagrant box and then apply a configuration.</description>
-    </item>
-    
-    <item>
-      <title>Creating a VXLAN Tunnel in Linux with Python</title>
-      <link>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</link>
-      <pubDate>Tue, 07 May 2019 05:28:48 -0500</pubDate>
-      
-      <guid>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</guid>
-      <description>&lt;p&gt;In this post I&amp;rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in &lt;a href=&#34;https://github.com/briantsaunders/linux-vxlan-tunnel-example-python-script&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>
