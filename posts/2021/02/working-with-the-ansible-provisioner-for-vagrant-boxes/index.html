@@ -19,7 +19,7 @@
 <meta itemprop="description" content="I&rsquo;ve been working with vagrant boxes for quite awhile now. I usually use them for development environments or creating lab environments for testing various network functions (i.e. BGP EVPN). Often times when I&rsquo;m using a vagrant box I need to get it in a certain state before it&rsquo;s ready for me to begin using. In the situation of creating lab environments I may need to install FRRouting on the vagrant box and then apply a configuration.">
 <meta itemprop="datePublished" content="2021-02-05T15:47:05-06:00" />
 <meta itemprop="dateModified" content="2021-02-05T15:47:05-06:00" />
-<meta itemprop="wordCount" content="1189">
+<meta itemprop="wordCount" content="1306">
 
 
 
@@ -136,8 +136,118 @@
 </div>
 </div><p>Another approach that vagrant allows is installation via pip.  Prior to installing ansible via pip I must first install pip.  The vagrant box that I selected comes bare bones and pip is not available.  Ubuntu 20.04 does not come with disutils and the pip installation will fail if it&rsquo;s not present.  So I also needed to make sure that is installed prior to the pip installation.  Within the Vagrantfile you define how pip should be installed via the <code>pip_install_command</code> statement.  In the above example you can see I&rsquo;m installing <code>python3-disutils</code> first and then installing pip.</p>
 <p>Once pip is installed vagrant will proceed with installing ansible.  If you prefer a specific version of ansible you can define the <code>version</code> otherwise pip will install the latest available.  If you have any ansible roles or collections that need to be installed prior to your playbook executing you can define those in the <code>galaxy_command</code> statement.  In my example I have a requirements.yml file defined within my collections folder that needs to be installed prior to my playbook executing.</p>
-<p>After ansible is installed vagrant will then run the playbook that is defined.  In my example my playbook is called <code>playbook.yml</code>.  My playbook basically follows the steps outlined <a href="https://deb.frrouting.org/">here</a> for installing FRRouting.  After the installation I also edit the <code>sysctl.conf</code> file to enable routing on the vagrant box.</p>
-<h3 id="vagrant-up">Vagrant Up</h3>
+<p>After ansible is installed vagrant will then run the playbook that is defined.  In my example my playbook is called <code>playbook.yml</code>.  My playbook basically follows the steps outlined <a href="https://deb.frrouting.org/">here</a> for installing FRRouting.  After the installation I also edit the <code>sysctl.conf</code> file to enable routing on the vagrant box.  Here are the contents of my playbook:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nn">---</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">provision vagrant box with frrouting</span><span class="w">
+</span><span class="w">  </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l">all</span><span class="w">
+</span><span class="w">  </span><span class="nt">gather_facts</span><span class="p">:</span><span class="w"> </span><span class="kc">no</span><span class="w">
+</span><span class="w">
+</span><span class="w">  </span><span class="nt">tasks</span><span class="p">:</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">add frr apt-key</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.builtin.apt_key</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">https://deb.frrouting.org/frr/keys.asc</span><span class="w">
+</span><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l">present</span><span class="w">
+</span><span class="w">      </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">get host distribution</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.builtin.command</span><span class="p">:</span><span class="w"> </span><span class="l">lsb_release -sc</span><span class="w">
+</span><span class="w">      </span><span class="nt">register</span><span class="p">:</span><span class="w"> </span><span class="l">release</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">add frr repository into source list</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.builtin.apt_repository</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;deb https://deb.frrouting.org/frr {{ release.stdout }} {{ frr_version }}&#34;</span><span class="w">
+</span><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l">present</span><span class="w">
+</span><span class="w">        </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/apt/sources.list.d/frr</span><span class="w">
+</span><span class="w">      </span><span class="nt">vars</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">frr_version</span><span class="p">:</span><span class="w"> </span><span class="l">frr-stable</span><span class="w">
+</span><span class="w">      </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">install frr</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.builtin.apt</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span>- <span class="l">frr</span><span class="w">
+</span><span class="w">          </span>- <span class="l">frr-pythontools</span><span class="w">
+</span><span class="w">        </span><span class="nt">update_cache</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">      </span><span class="nt">register</span><span class="p">:</span><span class="w"> </span><span class="l">apt_status</span><span class="w">
+</span><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">100</span><span class="w">
+</span><span class="w">      </span><span class="nt">until</span><span class="p">:</span><span class="w"> </span><span class="l">apt_status is success or (&#39;Failed to lock apt for exclusive operation&#39; not in apt_status.msg and &#39;/var/lib/dpkg/lock&#39; not in apt_status.msg)</span><span class="w">
+</span><span class="w">      </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">edit sysctl.conf for ipv4 forward</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.posix.sysctl</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">net.ipv4.ip_forward</span><span class="w">
+</span><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;1&#39;</span><span class="w">
+</span><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l">present</span><span class="w">
+</span><span class="w">        </span><span class="nt">reload</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">      </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">edit sysctl.conf for ipv6 forward</span><span class="w">
+</span><span class="w">      </span><span class="nt">ansible.posix.sysctl</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">net.ipv6.conf.all.forwarding</span><span class="w">
+</span><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;1&#39;</span><span class="w">
+</span><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l">present</span><span class="w">
+</span><span class="w">        </span><span class="nt">reload</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span><span class="w">      </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="kc">yes</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="vagrant-up">Vagrant Up</h3>
 <p>Go ahead and issue a <code>vagrant up</code> within the example repo.  You should see output similar to the following.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
