@@ -1,140 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Creating Vrfs in Linux With Python - Brian T. Saunders</title>
-  <meta property="og:title" content="Creating Vrfs in Linux With Python - Brian T. Saunders" />
-  <meta name="twitter:title" content="Creating Vrfs in Linux With Python - Brian T. Saunders" />
-  <meta name="description" content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github.">
-  <meta property="og:description" content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github.">
-  <meta name="twitter:description" content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github.">
-  <meta name="author" content="Brian Saunders"/>
-  <link rel='icon' type='image/x-icon' href="https://briantsaunders.github.io/img/favicon.ico" />
-  <meta property="og:site_name" content="Brian T. Saunders" />
-  <meta property="og:url" content="https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/" />
-  <meta property="og:type" content="article" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.80.0" /><meta itemprop="name" content="Creating Vrfs in Linux With Python">
-<meta itemprop="description" content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github.">
-<meta itemprop="datePublished" content="2019-05-25T08:55:50-05:00" />
-<meta itemprop="dateModified" content="2019-05-25T08:55:50-05:00" />
-<meta itemprop="wordCount" content="1484">
-
-
-
-<meta itemprop="keywords" content="vrf,python,linux,network," />
-
-
-  <link rel="stylesheet" href="/css/style.css" media="all" />
-  <link rel="stylesheet" href="/css/syntax.css" media="all" />
-  <link rel="stylesheet" href="/css/custom.css" media="all" />
-
-  <script src="/js/script.js"></script>
-  <script src="/js/custom.js"></script>
-  <script defer src="/js/fontawesome.js"></script>
-</head>
-
-<body>
-
-<header class="site-header">
-  <nav class="site-navi">
-    <h1 class="site-title"><a href="/">Brian T. Saunders</a></h1>
-    <ul class="site-navi-items">
-      <li class="site-navi-item-tags"><a href="/tags/" title="Tags">Tags</a></li>
-      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
-      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
-    </ul>
-  </nav>
-</header>
-<hr class="site-header-bottom">
-
-  <div class="main" role="main">
-    <article class="article">
-      
-      
-      <h1 class="article-title">Creating Vrfs in Linux With Python</h1>
-      
-      <hr class="article-title-bottom">
-      <ul class="article-meta">
-        <li class="article-meta-date"><time>May 25, 2019</time></li>
-        <li class="article-meta-tags">
-          <a href="/tags/vrf/">
-            <i class="fas fa-tag"></i>
-            vrf
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/python/">
-            <i class="fas fa-tag"></i>
-            python
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/linux/">
-            <i class="fas fa-tag"></i>
-            linux
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/network/">
-            <i class="fas fa-tag"></i>
-            network
-          </a>&nbsp;
-        </li>
-      </ul>
-      
-<aside class="toc">
-  <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#vrfs-cli-commands">VRFs CLI Commands</a></li>
-        <li><a href="#vrfs-in-python">VRFs in Python</a></li>
-        <li><a href="#helpful-references">Helpful References</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-</aside>
-      <p>In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in <a href="https://github.com/briantsaunders/linux-vrf-example-python-script">github</a>.</p>
-<p>Here&rsquo;s our environment:</p>
-<p><img src="/img/2019/05/creating_vrfs_in_linux_with_python_environment.png" alt="Environment"></p>
-<p>Prior to us creating the VRFs all servers connected to site1router will be able to talk to each other.  In this post we will create two VRFs, vrf1 and vrf2.  On site1router we will then associate interfaces eth1 and eth2 with vrf1 and interfaces eth3 and eth4 with vrf2.  Once the interface is associated with the vrf the network configured on the interface will be contained to their respective vrf route table.  This will prevent servers on seperate VRFs from being able to communicate.</p>
-<h3 id="prerequisites">Prerequisites</h3>
-<p>If you&rsquo;re following along via the vagrant environment these are handled for you but if you&rsquo;re wanting to perform this on your own you need to ensure that the following prerequisites are met.</p>
-<p>On the linux host that the VRFs will be created on you need to make sure the following is installed:</p>
-<ul>
-<li><a href="https://github.com/svinota/pyroute2">pyroute2</a></li>
-</ul>
-<p>Pyroute2 is the python package that is going to allow for the management of VRFs.  It&rsquo;s very useful for interacting with the linux network stack with python.</p>
-<p>On the same linux host you need to ensure that you have enabled ipv4 forwarding so that it can route packets.  From the CLI you can enable via:</p>
-<pre><code>sudo sysctl -w net.ipv4.ip_forward=1
-</code></pre><h3 id="vrfs-cli-commands">VRFs CLI Commands</h3>
-<p>Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure.  We&rsquo;re going to be using our vagrant environment as the example for the commands to use.</p>
-<h5 id="create-vrfs">Create VRFs</h5>
-<pre><code>sudo ip link add vrf1 type vrf table 1
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Creating VRFs in Linux With Python | briantsaunders blog</title><meta name=keywords content="vrf,python,linux,network"><meta name=description content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github."><meta name=author content="Me"><link rel=canonical href=https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/><link crossorigin=anonymous href=/assets/css/stylesheet.min.ec8da366ca2fb647537ccb7a8f6fa5b4e9cd3c7a0d3171dd2d3baad1e49c8bfc.css integrity="sha256-7I2jZsovtkdTfMt6j2+ltOnNPHoNMXHdLTuq0eSci/w=" rel="preload stylesheet" as=style><script defer crossorigin=anonymous src=/assets/js/highlight.min.2840b7fccd34145847db71a290569594bdbdb00047097f75d6495d162f5d7dff.js integrity="sha256-KEC3/M00FFhH23GikFaVlL29sABHCX911kldFi9dff8=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=https://briantsaunders.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://briantsaunders.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://briantsaunders.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://briantsaunders.github.io/apple-touch-icon.png><link rel=mask-icon href=https://briantsaunders.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(e,o,i,a,t,n,s){e.GoogleAnalyticsObject=t,e[t]=e[t]||function(){(e[t].q=e[t].q||[]).push(arguments)},e[t].l=1*new Date,n=o.createElement(i),s=o.getElementsByTagName(i)[0],n.async=1,n.src=a,s.parentNode.insertBefore(n,s)}(window,document,"script","https://www.google-analytics.com/analytics.js","ga"),ga("create","UA-40258484-2","auto"),ga("send","pageview"))</script><meta property="og:title" content="Creating VRFs in Linux With Python"><meta property="og:description" content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github."><meta property="og:type" content="article"><meta property="og:url" content="https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-05-25T08:55:50-05:00"><meta property="article:modified_time" content="2019-05-25T08:55:50-05:00"><meta property="og:site_name" content="briantsaunders blog"><meta name=twitter:card content="summary"><meta name=twitter:title content="Creating VRFs in Linux With Python"><meta name=twitter:description content="In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python.  To follow along I have created a vagrant environment and example python script in github."><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://briantsaunders.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Creating VRFs in Linux With Python","item":"https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Creating VRFs in Linux With Python","name":"Creating VRFs in Linux With Python","description":"In this post I\u0026rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python. To follow along I have created a vagrant environment and example python script in github.\n","keywords":["vrf","python","linux","network"],"articleBody":"In this post I’m going to talk about how to create, edit, and delete VRFs in linux with python. To follow along I have created a vagrant environment and example python script in github.\nHere’s our environment:\nPrior to us creating the VRFs all servers connected to site1router will be able to talk to each other. In this post we will create two VRFs, vrf1 and vrf2. On site1router we will then associate interfaces eth1 and eth2 with vrf1 and interfaces eth3 and eth4 with vrf2. Once the interface is associated with the vrf the network configured on the interface will be contained to their respective vrf route table. This will prevent servers on seperate VRFs from being able to communicate.\nPrerequisites If you’re following along via the vagrant environment these are handled for you but if you’re wanting to perform this on your own you need to ensure that the following prerequisites are met.\nOn the linux host that the VRFs will be created on you need to make sure the following is installed:\n pyroute2  Pyroute2 is the python package that is going to allow for the management of VRFs. It’s very useful for interacting with the linux network stack with python.\nOn the same linux host you need to ensure that you have enabled ipv4 forwarding so that it can route packets. From the CLI you can enable via:\nsudo sysctl -w net.ipv4.ip_forward=1 VRFs CLI Commands Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure. We’re going to be using our vagrant environment as the example for the commands to use.\nCreate VRFs sudo ip link add vrf1 type vrf table 1 sudo ip link set dev vrf1 up sudo ip link add vrf2 type vrf table 2 sudo ip link set dev vrf2 up Associate Interfaces with VRF sudo ip link set dev eth1 master vrf1 sudo ip link set dev eth2 master vrf1 sudo ip link set dev eth3 master vrf2 sudo ip link set dev eth4 master vrf2 Remove Interfaces from VRF sudo ip link set dev eth1 nomaster sudo ip link set dev eth2 nomaster sudo ip link set dev eth3 nomaster sudo ip link set dev eth4 nomaster Delete VRFs sudo ip link delete vrf1 sudo ip link delete vrf2 VRFs in Python Validate Pre Configuration Prior to creating our VRFs and associating the interfaces let’s confirm one of our servers can talk to all the others via a simple ping.\nλ vagrant ssh site1server1 Last login: Sun May 26 07:34:55 2019 from 10.0.2.2 vagrant@site1server1:~$ ping 10.1.2.10 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data. 64 bytes from 10.1.2.10: icmp_seq=1 ttl=63 time=1.11 ms 64 bytes from 10.1.2.10: icmp_seq=2 ttl=63 time=0.570 ms ^C --- 10.1.2.10 ping statistics --- 2 packets transmitted, 2 received, 0% packet loss, time 1002ms rtt min/avg/max/mdev = 0.570/0.840/1.111/0.272 ms vagrant@site1server1:~$ ping 10.1.3.10 PING 10.1.3.10 (10.1.3.10) 56(84) bytes of data. 64 bytes from 10.1.3.10: icmp_seq=1 ttl=63 time=0.960 ms 64 bytes from 10.1.3.10: icmp_seq=2 ttl=63 time=2.02 ms 64 bytes from 10.1.3.10: icmp_seq=3 ttl=63 time=1.80 ms ^C --- 10.1.3.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2004ms rtt min/avg/max/mdev = 0.960/1.596/2.026/0.460 ms vagrant@site1server1:~$ ping 10.1.4.10 PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data. 64 bytes from 10.1.4.10: icmp_seq=1 ttl=63 time=72.3 ms 64 bytes from 10.1.4.10: icmp_seq=2 ttl=63 time=1.93 ms 64 bytes from 10.1.4.10: icmp_seq=3 ttl=63 time=1.92 ms ^C --- 10.1.4.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2004ms rtt min/avg/max/mdev = 1.929/25.414/72.377/33.207 ms vagrant@site1server1:~$ Create VRFs from pyroute2 import IPDB  with IPDB() as ipdb:  with ipdb.create(kind=\"vrf\", ifname=\"vrf1\", vrf_table=1) as vrf:  vrf.up()  with ipdb.create(kind=\"vrf\", ifname=\"vrf2\",vrf_table=2) as vrf:  vrf.up() Associate Interfaces with VRF from pyroute2 import IPDB  with IPDB() as ipdb:  with ipdb.interfaces[\"vrf1\"] as vrf:  vrf.add_port(ipdb.interfaces[\"eth1\"].index)  vrf.add_port(ipdb.interfaces[\"eth2\"].index)  with ipdb.interfaces[\"vrf2\"] as vrf:  vrf.add_port(ipdb.interfaces[\"eth3\"].index)  vrf.add_port(ipdb.interfaces[\"eth4\"].index) Validate Post Configuration After creating our VRFs and associating out interfaces to their respective VRF let’s confirm the site1router route table is updated to reflect the VRFs and that the servers can only communicate with other hosts associated with the same VRF.\nList site1router vrfs.\nvagrant@site1router:~$ ip link show type vrf 7: vrf1:  mtu 65536 qdisc noqueue state UP mode DEFAULT group default qlen 1000 link/ether 62:ec:0e:17:e6:69 brd ff:ff:ff:ff:ff:ff 8: vrf2:  mtu 65536 qdisc noqueue state UP mode DEFAULT group default qlen 1000 link/ether 46:44:1f:75:a1:cb brd ff:ff:ff:ff:ff:ff vagrant@site1router:~$ Check site1router global route table.\nvagrant@site1router:~$ route Kernel IP routing table Destination Gateway Genmask Flags Metric Ref Use Iface default _gateway 0.0.0.0 UG 100 0 0 eth0 10.0.2.0 0.0.0.0 255.255.255.0 U 0 0 0 eth0 _gateway 0.0.0.0 255.255.255.255 UH 100 0 0 eth0 vagrant@site1router:~$ Check site1router vrf1 and vrf2 route table.\nvagrant@site1router:~$ ip route show vrf vrf1 10.1.1.0/24 dev eth1 proto kernel scope link src 10.1.1.1 10.1.2.0/24 dev eth2 proto kernel scope link src 10.1.2.1 vagrant@site1router:~$ ip route show vrf vrf2 10.1.3.0/24 dev eth3 proto kernel scope link src 10.1.3.1 10.1.4.0/24 dev eth4 proto kernel scope link src 10.1.4.1 vagrant@site1router:~$ Confirm site1server1 can only talk to site1server2.\nvagrant@site1server1:~$ ping 10.1.2.10 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data. 64 bytes from 10.1.2.10: icmp_seq=1 ttl=63 time=1.49 ms 64 bytes from 10.1.2.10: icmp_seq=2 ttl=63 time=1.52 ms ^C --- 10.1.2.10 ping statistics --- 2 packets transmitted, 2 received, 0% packet loss, time 1002ms rtt min/avg/max/mdev = 1.492/1.507/1.523/0.041 ms vagrant@site1server1:~$ ping 10.1.3.10 PING 10.1.3.10 (10.1.3.10) 56(84) bytes of data. ^C --- 10.1.3.10 ping statistics --- 3 packets transmitted, 0 received, 100% packet loss, time 2028ms vagrant@site1server1:~$ ping 10.1.4.10 PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data. ^C --- 10.1.4.10 ping statistics --- 4 packets transmitted, 0 received, 100% packet loss, time 3070ms vagrant@site1server1:~$ Confirm site1server3 can only talk to site1server3.\nvagrant@site1server3:~$ ping 10.1.4.10 PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data. 64 bytes from 10.1.4.10: icmp_seq=1 ttl=63 time=1.14 ms 64 bytes from 10.1.4.10: icmp_seq=2 ttl=63 time=1.95 ms 64 bytes from 10.1.4.10: icmp_seq=3 ttl=63 time=1.65 ms ^C --- 10.1.4.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2005ms rtt min/avg/max/mdev = 1.149/1.588/1.959/0.337 ms vagrant@site1server3:~$ ping 10.1.1.10 PING 10.1.1.10 (10.1.1.10) 56(84) bytes of data. ^C --- 10.1.1.10 ping statistics --- 3 packets transmitted, 0 received, 100% packet loss, time 2035ms vagrant@site1server3:~$ ping 10.1.2.10 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data. ^C --- 10.1.2.10 ping statistics --- 3 packets transmitted, 0 received, 100% packet loss, time 2051ms vagrant@site1server3:~$ Remove Interfaces from VRF At this time I have not found a way to remove an interface from a vrf via pyroute2. A work around for now is just issuing the shell commands in python.\nimport subprocess  subprocess.run(f\"ip link set dev eth1 nomaster\", shell=True) subprocess.run(f\"ip link set dev eth2 nomaster\", shell=True) subprocess.run(f\"ip link set dev eth3 nomaster\", shell=True) subprocess.run(f\"ip link set dev eth4 nomaster\", shell=True) Delete VRFs from pyroute2 import IPDB  with IPDB() as ipdb:  with ipdb.interfaces[\"vrf1\"] as vrf:  vrf.remove()  with ipdb.interfaces[\"vrf2\"] as vrf:  vrf.remove() Validate Post Deletion After removing our interfaces from the VRFs and deleting the VRFs lets confirm the global route table is updated on site1router to reflect this change and confirm the servers can now communicate with each other.\nList site1router vrfs.\nvagrant@site1router:~$ ip link show type vrf vagrant@site1router:~$ Check site1router global route table.\nvagrant@site1router:~$ route Kernel IP routing table Destination Gateway Genmask Flags Metric Ref Use Iface default _gateway 0.0.0.0 UG 100 0 0 eth0 10.0.2.0 0.0.0.0 255.255.255.0 U 0 0 0 eth0 _gateway 0.0.0.0 255.255.255.255 UH 100 0 0 eth0 10.1.1.0 0.0.0.0 255.255.255.0 U 0 0 0 eth1 10.1.2.0 0.0.0.0 255.255.255.0 U 0 0 0 eth2 10.1.3.0 0.0.0.0 255.255.255.0 U 0 0 0 eth3 10.1.4.0 0.0.0.0 255.255.255.0 U 0 0 0 eth4 vagrant@site1router:~$ Confirm site1server1 can talk to all hosts.\nvagrant@site1server1:~$ ping 10.1.2.10 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data. 64 bytes from 10.1.2.10: icmp_seq=1 ttl=63 time=1.09 ms 64 bytes from 10.1.2.10: icmp_seq=2 ttl=63 time=1.80 ms 64 bytes from 10.1.2.10: icmp_seq=3 ttl=63 time=1.62 ms ^C --- 10.1.2.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2004ms rtt min/avg/max/mdev = 1.090/1.507/1.807/0.305 ms vagrant@site1server1:~$ ping 10.1.3.10 PING 10.1.3.10 (10.1.3.10) 56(84) bytes of data. 64 bytes from 10.1.3.10: icmp_seq=1 ttl=63 time=0.996 ms 64 bytes from 10.1.3.10: icmp_seq=2 ttl=63 time=0.978 ms 64 bytes from 10.1.3.10: icmp_seq=3 ttl=63 time=0.699 ms ^C --- 10.1.3.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2003ms rtt min/avg/max/mdev = 0.699/0.891/0.996/0.135 ms vagrant@site1server1:~$ ping 10.1.4.10 PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data. 64 bytes from 10.1.4.10: icmp_seq=1 ttl=63 time=0.948 ms 64 bytes from 10.1.4.10: icmp_seq=2 ttl=63 time=1.83 ms 64 bytes from 10.1.4.10: icmp_seq=3 ttl=63 time=1.72 ms ^C --- 10.1.4.10 ping statistics --- 3 packets transmitted, 3 received, 0% packet loss, time 2004ms rtt min/avg/max/mdev = 0.948/1.502/1.832/0.395 ms vagrant@site1server1:~$ Helpful References I couldn’t have created this post without the following helpful sites.\n Virtual Routing and Forwarding in Linux ","wordCount":"1455","inLanguage":"en","datePublished":"2019-05-25T08:55:50-05:00","dateModified":"2019-05-25T08:55:50-05:00","author":{"@type":"Person","name":"Me"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/"},"publisher":{"@type":"Organization","name":"briantsaunders blog","logo":{"@type":"ImageObject","url":"https://briantsaunders.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://briantsaunders.github.io/ accesskey=h title="briantsaunders blog (Alt + H)">briantsaunders blog</a>
+<span class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></span></div><ul id=menu><li><a href=https://briantsaunders.github.io/archives title=Archive><span>Archive</span></a></li><li><a href=https://briantsaunders.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://briantsaunders.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://briantsaunders.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://briantsaunders.github.io/posts/>Posts</a></div><h1 class=post-title>Creating VRFs in Linux With Python</h1><div class=post-meta><span title="2019-05-25 08:55:50 -0500 CDT">May 25, 2019</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;Me</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><ul><li><a href=#prerequisites aria-label=Prerequisites>Prerequisites</a></li><li><a href=#vrfs-cli-commands aria-label="VRFs CLI Commands">VRFs CLI Commands</a><ul><ul><li><a href=#create-vrfs aria-label="Create VRFs">Create VRFs</a></li><li><a href=#associate-interfaces-with-vrf aria-label="Associate Interfaces with VRF">Associate Interfaces with VRF</a></li><li><a href=#remove-interfaces-from-vrf aria-label="Remove Interfaces from VRF">Remove Interfaces from VRF</a></li><li><a href=#delete-vrfs aria-label="Delete VRFs">Delete VRFs</a></li></ul></ul></li><li><a href=#vrfs-in-python aria-label="VRFs in Python">VRFs in Python</a><ul><ul><li><a href=#validate-pre-configuration aria-label="Validate Pre Configuration">Validate Pre Configuration</a></li><li><a href=#create-vrfs-1 aria-label="Create VRFs">Create VRFs</a></li><li><a href=#associate-interfaces-with-vrf-1 aria-label="Associate Interfaces with VRF">Associate Interfaces with VRF</a></li><li><a href=#validate-post-configuration aria-label="Validate Post Configuration">Validate Post Configuration</a></li><li><a href=#remove-interfaces-from-vrf-1 aria-label="Remove Interfaces from VRF">Remove Interfaces from VRF</a></li><li><a href=#delete-vrfs-1 aria-label="Delete VRFs">Delete VRFs</a></li><li><a href=#validate-post-deletion aria-label="Validate Post Deletion">Validate Post Deletion</a></li></ul></ul></li><li><a href=#helpful-references aria-label="Helpful References">Helpful References</a></li></ul></div></details></div><div class=post-content><p>In this post I&rsquo;m going to talk about how to create, edit, and delete VRFs in linux with python. To follow along I have created a vagrant environment and example python script in <a href=https://github.com/briantsaunders/linux-vrf-example-python-script>github</a>.</p><p>Here&rsquo;s our environment:</p><p><img loading=lazy src=/img/2019/05/creating_vrfs_in_linux_with_python_environment.png alt=Environment></p><p>Prior to us creating the VRFs all servers connected to site1router will be able to talk to each other. In this post we will create two VRFs, vrf1 and vrf2. On site1router we will then associate interfaces eth1 and eth2 with vrf1 and interfaces eth3 and eth4 with vrf2. Once the interface is associated with the vrf the network configured on the interface will be contained to their respective vrf route table. This will prevent servers on seperate VRFs from being able to communicate.</p><h3 id=prerequisites>Prerequisites<a hidden class=anchor aria-hidden=true href=#prerequisites>#</a></h3><p>If you&rsquo;re following along via the vagrant environment these are handled for you but if you&rsquo;re wanting to perform this on your own you need to ensure that the following prerequisites are met.</p><p>On the linux host that the VRFs will be created on you need to make sure the following is installed:</p><ul><li><a href=https://github.com/svinota/pyroute2>pyroute2</a></li></ul><p>Pyroute2 is the python package that is going to allow for the management of VRFs. It&rsquo;s very useful for interacting with the linux network stack with python.</p><p>On the same linux host you need to ensure that you have enabled ipv4 forwarding so that it can route packets. From the CLI you can enable via:</p><pre tabindex=0><code>sudo sysctl -w net.ipv4.ip_forward=1
+</code></pre><h3 id=vrfs-cli-commands>VRFs CLI Commands<a hidden class=anchor aria-hidden=true href=#vrfs-cli-commands>#</a></h3><p>Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure. We&rsquo;re going to be using our vagrant environment as the example for the commands to use.</p><h5 id=create-vrfs>Create VRFs<a hidden class=anchor aria-hidden=true href=#create-vrfs>#</a></h5><pre tabindex=0><code>sudo ip link add vrf1 type vrf table 1
 sudo ip link set dev vrf1 up
 sudo ip link add vrf2 type vrf table 2
 sudo ip link set dev vrf2 up
-</code></pre><h5 id="associate-interfaces-with-vrf">Associate Interfaces with VRF</h5>
-<pre><code>sudo ip link set dev eth1 master vrf1
+</code></pre><h5 id=associate-interfaces-with-vrf>Associate Interfaces with VRF<a hidden class=anchor aria-hidden=true href=#associate-interfaces-with-vrf>#</a></h5><pre tabindex=0><code>sudo ip link set dev eth1 master vrf1
 sudo ip link set dev eth2 master vrf1
 sudo ip link set dev eth3 master vrf2
 sudo ip link set dev eth4 master vrf2
-</code></pre><h5 id="remove-interfaces-from-vrf">Remove Interfaces from VRF</h5>
-<pre><code>sudo ip link set dev eth1 nomaster
+</code></pre><h5 id=remove-interfaces-from-vrf>Remove Interfaces from VRF<a hidden class=anchor aria-hidden=true href=#remove-interfaces-from-vrf>#</a></h5><pre tabindex=0><code>sudo ip link set dev eth1 nomaster
 sudo ip link set dev eth2 nomaster
 sudo ip link set dev eth3 nomaster
 sudo ip link set dev eth4 nomaster
-</code></pre><h5 id="delete-vrfs">Delete VRFs</h5>
-<pre><code>sudo ip link delete vrf1
+</code></pre><h5 id=delete-vrfs>Delete VRFs<a hidden class=anchor aria-hidden=true href=#delete-vrfs>#</a></h5><pre tabindex=0><code>sudo ip link delete vrf1
 sudo ip link delete vrf2
-</code></pre><h3 id="vrfs-in-python">VRFs in Python</h3>
-<h5 id="validate-pre-configuration">Validate Pre Configuration</h5>
-<p>Prior to creating our VRFs and associating the interfaces let&rsquo;s confirm one of our servers can talk to all the others via a simple ping.</p>
-<pre><code>λ vagrant ssh site1server1
+</code></pre><h3 id=vrfs-in-python>VRFs in Python<a hidden class=anchor aria-hidden=true href=#vrfs-in-python>#</a></h3><h5 id=validate-pre-configuration>Validate Pre Configuration<a hidden class=anchor aria-hidden=true href=#validate-pre-configuration>#</a></h5><p>Prior to creating our VRFs and associating the interfaces let&rsquo;s confirm one of our servers can talk to all the others via a simple ping.</p><pre tabindex=0><code>λ vagrant ssh site1server1
 Last login: Sun May 26 07:34:55 2019 from 10.0.2.2
 vagrant@site1server1:~$ ping 10.1.2.10
 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data.
@@ -163,79 +44,43 @@ PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data.
 3 packets transmitted, 3 received, 0% packet loss, time 2004ms
 rtt min/avg/max/mdev = 1.929/25.414/72.377/33.207 ms
 vagrant@site1server1:~$
-</code></pre><h5 id="create-vrfs-1">Create VRFs</h5>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="k">with</span> <span class="n">IPDB</span><span class="p">()</span> <span class="k">as</span> <span class="n">ipdb</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vrf&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;vrf1&#34;</span><span class="p">,</span> <span class="n">vrf_table</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vrf&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;vrf2&#34;</span><span class="p">,</span><span class="n">vrf_table</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><h5 id="associate-interfaces-with-vrf-1">Associate Interfaces with VRF</h5>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="k">with</span> <span class="n">IPDB</span><span class="p">()</span> <span class="k">as</span> <span class="n">ipdb</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vrf1&#34;</span><span class="p">]</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth1&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vrf2&#34;</span><span class="p">]</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth3&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth4&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h5 id="validate-post-configuration">Validate Post Configuration</h5>
-<p>After creating our VRFs and associating out interfaces to their respective VRF let&rsquo;s confirm the site1router route table is updated to reflect the VRFs and that the servers can only communicate with other hosts associated with the same VRF.</p>
-<p>List site1router vrfs.</p>
-<pre><code>vagrant@site1router:~$ ip link show type vrf
+</code></pre><h5 id=create-vrfs-1>Create VRFs<a hidden class=anchor aria-hidden=true href=#create-vrfs-1>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> IPDB() <span style=color:#66d9ef>as</span> ipdb:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>create(kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vrf&#34;</span>, ifname<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vrf1&#34;</span>, vrf_table<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>create(kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vrf&#34;</span>, ifname<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vrf2&#34;</span>,vrf_table<span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>up()
+</span></span></code></pre></div><h5 id=associate-interfaces-with-vrf-1>Associate Interfaces with VRF<a hidden class=anchor aria-hidden=true href=#associate-interfaces-with-vrf-1>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> IPDB() <span style=color:#66d9ef>as</span> ipdb:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vrf1&#34;</span>] <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth1&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vrf2&#34;</span>] <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth3&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth4&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span></code></pre></div><h5 id=validate-post-configuration>Validate Post Configuration<a hidden class=anchor aria-hidden=true href=#validate-post-configuration>#</a></h5><p>After creating our VRFs and associating out interfaces to their respective VRF let&rsquo;s confirm the site1router route table is updated to reflect the VRFs and that the servers can only communicate with other hosts associated with the same VRF.</p><p>List site1router vrfs.</p><pre tabindex=0><code>vagrant@site1router:~$ ip link show type vrf
 7: vrf1: &lt;MASTER,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UP mode DEFAULT group default qlen 1000
     link/ether 62:ec:0e:17:e6:69 brd ff:ff:ff:ff:ff:ff
 8: vrf2: &lt;MASTER,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UP mode DEFAULT group default qlen 1000
     link/ether 46:44:1f:75:a1:cb brd ff:ff:ff:ff:ff:ff
 vagrant@site1router:~$
-</code></pre><p>Check site1router global route table.</p>
-<pre><code>vagrant@site1router:~$ route
+</code></pre><p>Check site1router global route table.</p><pre tabindex=0><code>vagrant@site1router:~$ route
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 default         _gateway        0.0.0.0         UG    100    0        0 eth0
 10.0.2.0        0.0.0.0         255.255.255.0   U     0      0        0 eth0
 _gateway        0.0.0.0         255.255.255.255 UH    100    0        0 eth0
 vagrant@site1router:~$
-</code></pre><p>Check site1router vrf1 and vrf2 route table.</p>
-<pre><code>vagrant@site1router:~$ ip route show vrf vrf1
+</code></pre><p>Check site1router vrf1 and vrf2 route table.</p><pre tabindex=0><code>vagrant@site1router:~$ ip route show vrf vrf1
 10.1.1.0/24 dev eth1 proto kernel scope link src 10.1.1.1
 10.1.2.0/24 dev eth2 proto kernel scope link src 10.1.2.1
 vagrant@site1router:~$ ip route show vrf vrf2
 10.1.3.0/24 dev eth3 proto kernel scope link src 10.1.3.1
 10.1.4.0/24 dev eth4 proto kernel scope link src 10.1.4.1
 vagrant@site1router:~$
-</code></pre><p>Confirm site1server1 can only talk to site1server2.</p>
-<pre><code>vagrant@site1server1:~$ ping 10.1.2.10
+</code></pre><p>Confirm site1server1 can only talk to site1server2.</p><pre tabindex=0><code>vagrant@site1server1:~$ ping 10.1.2.10
 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data.
 64 bytes from 10.1.2.10: icmp_seq=1 ttl=63 time=1.49 ms
 64 bytes from 10.1.2.10: icmp_seq=2 ttl=63 time=1.52 ms
@@ -256,8 +101,7 @@ PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data.
 4 packets transmitted, 0 received, 100% packet loss, time 3070ms
 
 vagrant@site1server1:~$
-</code></pre><p>Confirm site1server3 can only talk to site1server3.</p>
-<pre><code>vagrant@site1server3:~$ ping 10.1.4.10
+</code></pre><p>Confirm site1server3 can only talk to site1server3.</p><pre tabindex=0><code>vagrant@site1server3:~$ ping 10.1.4.10
 PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data.
 64 bytes from 10.1.4.10: icmp_seq=1 ttl=63 time=1.14 ms
 64 bytes from 10.1.4.10: icmp_seq=2 ttl=63 time=1.95 ms
@@ -279,54 +123,22 @@ PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data.
 3 packets transmitted, 0 received, 100% packet loss, time 2051ms
 
 vagrant@site1server3:~$
-</code></pre><h5 id="remove-interfaces-from-vrf-1">Remove Interfaces from VRF</h5>
-<p>At this time I have not found a way to remove an interface from a vrf via pyroute2.  A work around for now is just issuing the shell commands in python.</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">subprocess</span>
-
-<span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;ip link set dev eth1 nomaster&#34;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;ip link set dev eth2 nomaster&#34;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;ip link set dev eth3 nomaster&#34;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;ip link set dev eth4 nomaster&#34;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h5 id="delete-vrfs-1">Delete VRFs</h5>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="k">with</span> <span class="n">IPDB</span><span class="p">()</span> <span class="k">as</span> <span class="n">ipdb</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vrf1&#34;</span><span class="p">]</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vrf2&#34;</span><span class="p">]</span> <span class="k">as</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">vrf</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><h5 id="validate-post-deletion">Validate Post Deletion</h5>
-<p>After removing our interfaces from the VRFs and deleting the VRFs lets confirm the global route table is updated on site1router to reflect this change and confirm the servers can now communicate with each other.</p>
-<p>List site1router vrfs.</p>
-<pre><code>vagrant@site1router:~$ ip link show type vrf
+</code></pre><h5 id=remove-interfaces-from-vrf-1>Remove Interfaces from VRF<a hidden class=anchor aria-hidden=true href=#remove-interfaces-from-vrf-1>#</a></h5><p>At this time I have not found a way to remove an interface from a vrf via pyroute2. A work around for now is just issuing the shell commands in python.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>import</span> subprocess
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>subprocess<span style=color:#f92672>.</span>run(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;ip link set dev eth1 nomaster&#34;</span>, shell<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>subprocess<span style=color:#f92672>.</span>run(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;ip link set dev eth2 nomaster&#34;</span>, shell<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>subprocess<span style=color:#f92672>.</span>run(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;ip link set dev eth3 nomaster&#34;</span>, shell<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>subprocess<span style=color:#f92672>.</span>run(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;ip link set dev eth4 nomaster&#34;</span>, shell<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span></code></pre></div><h5 id=delete-vrfs-1>Delete VRFs<a hidden class=anchor aria-hidden=true href=#delete-vrfs-1>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> IPDB() <span style=color:#66d9ef>as</span> ipdb:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vrf1&#34;</span>] <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>remove()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vrf2&#34;</span>] <span style=color:#66d9ef>as</span> vrf:
+</span></span><span style=display:flex><span>        vrf<span style=color:#f92672>.</span>remove()
+</span></span></code></pre></div><h5 id=validate-post-deletion>Validate Post Deletion<a hidden class=anchor aria-hidden=true href=#validate-post-deletion>#</a></h5><p>After removing our interfaces from the VRFs and deleting the VRFs lets confirm the global route table is updated on site1router to reflect this change and confirm the servers can now communicate with each other.</p><p>List site1router vrfs.</p><pre tabindex=0><code>vagrant@site1router:~$ ip link show type vrf
 vagrant@site1router:~$
-</code></pre><p>Check site1router global route table.</p>
-<pre><code>vagrant@site1router:~$ route
+</code></pre><p>Check site1router global route table.</p><pre tabindex=0><code>vagrant@site1router:~$ route
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 default         _gateway        0.0.0.0         UG    100    0        0 eth0
@@ -337,8 +149,7 @@ _gateway        0.0.0.0         255.255.255.255 UH    100    0        0 eth0
 10.1.3.0        0.0.0.0         255.255.255.0   U     0      0        0 eth3
 10.1.4.0        0.0.0.0         255.255.255.0   U     0      0        0 eth4
 vagrant@site1router:~$
-</code></pre><p>Confirm site1server1 can talk to all hosts.</p>
-<pre><code>vagrant@site1server1:~$ ping 10.1.2.10
+</code></pre><p>Confirm site1server1 can talk to all hosts.</p><pre tabindex=0><code>vagrant@site1server1:~$ ping 10.1.2.10
 PING 10.1.2.10 (10.1.2.10) 56(84) bytes of data.
 64 bytes from 10.1.2.10: icmp_seq=1 ttl=63 time=1.09 ms
 64 bytes from 10.1.2.10: icmp_seq=2 ttl=63 time=1.80 ms
@@ -366,50 +177,8 @@ PING 10.1.4.10 (10.1.4.10) 56(84) bytes of data.
 3 packets transmitted, 3 received, 0% packet loss, time 2004ms
 rtt min/avg/max/mdev = 0.948/1.502/1.832/0.395 ms
 vagrant@site1server1:~$
-</code></pre><h3 id="helpful-references">Helpful References</h3>
-<p>I couldn&rsquo;t have created this post without the following helpful sites.</p>
-<ul>
-<li><a href="https://www.kernel.org/doc/Documentation/networking/vrf.txt">Virtual Routing and Forwarding in Linux</a></li>
-</ul>
-    </article>
-
-    
-
-
-    <ul class="pager article-pager">
-      <li class="pager-newer">
-          <a href="/posts/2019/08/my-flask-api-setup/" data-toggle="tooltip" data-placement="top" title="My Flask API Setup">&lt; Newer</a>
-      </li>
-      <li class="pager-older">
-        <a href="/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/" data-toggle="tooltip" data-placement="top" title="Creating a VXLAN Tunnel in Linux with Python">Older &gt;</a>
-      </li>
-    </ul>
-  </div>
-
-
-<div class="site-footer">
-  <div class="copyright">&copy; Copyright 2019 Brian T. Saunders</div>
-  <ul class="site-footer-items">
-    <li class="site-footer-item-about"><a href="/about/" title="About">About</a></li>
-  </ul>
-  <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
-  </div>
-</div>
-
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-	ga('create', 'UA-40258484-2', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-
-
-</body>
-</html>
+</code></pre><h3 id=helpful-references>Helpful References<a hidden class=anchor aria-hidden=true href=#helpful-references>#</a></h3><p>I couldn&rsquo;t have created this post without the following helpful sites.</p><ul><li><a href=https://www.kernel.org/doc/Documentation/networking/vrf.txt>Virtual Routing and Forwarding in Linux</a></li></ul></div><footer class=post-footer><ul class=post-tags><li><a href=https://briantsaunders.github.io/tags/vrf/>vrf</a></li><li><a href=https://briantsaunders.github.io/tags/python/>python</a></li><li><a href=https://briantsaunders.github.io/tags/linux/>linux</a></li><li><a href=https://briantsaunders.github.io/tags/network/>network</a></li></ul><nav class=paginav><a class=prev href=https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/><span class=title>« Prev</span><br><span>My Flask API Setup</span></a>
+<a class=next href=https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/><span class=title>Next »</span><br><span>Creating a VXLAN Tunnel in Linux with Python</span></a></nav><div class=share-buttons><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on twitter" href="https://twitter.com/intent/tweet/?text=Creating%20VRFs%20in%20Linux%20With%20Python&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f&hashtags=vrf%2cpython%2clinux%2cnetwork"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f&title=Creating%20VRFs%20in%20Linux%20With%20Python&summary=Creating%20VRFs%20in%20Linux%20With%20Python&source=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f&title=Creating%20VRFs%20in%20Linux%20With%20Python"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on whatsapp" href="https://api.whatsapp.com/send?text=Creating%20VRFs%20in%20Linux%20With%20Python%20-%20https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating VRFs in Linux With Python on telegram" href="https://telegram.me/share/url?text=Creating%20VRFs%20in%20Linux%20With%20Python&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vrfs-in-linux-with-python%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></div></footer></article></main><footer class=footer><span>&copy; 2022 <a href=https://briantsaunders.github.io/>briantsaunders blog</a></span>
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg></a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(t){t.preventDefault();var e=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView({behavior:"smooth"}),e==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${e}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(t=>{const n=t.parentNode.parentNode,e=document.createElement("button");e.classList.add("copy-code"),e.innerHTML="copy";function s(){e.innerHTML="copied!",setTimeout(()=>{e.innerHTML="copy"},2e3)}e.addEventListener("click",o=>{if("clipboard"in navigator){navigator.clipboard.writeText(t.textContent),s();return}const e=document.createRange();e.selectNodeContents(t);const n=window.getSelection();n.removeAllRanges(),n.addRange(e);try{document.execCommand("copy"),s()}catch(e){}n.removeRange(e)}),n.classList.contains("highlight")?n.appendChild(e):n.parentNode.firstChild==n||(t.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?t.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(e):t.parentNode.appendChild(e))})</script></body></html>

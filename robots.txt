@@ -1,1 +1,3 @@
 User-agent: *
+Disallow:
+Sitemap: https://briantsaunders.github.io/sitemap.xml

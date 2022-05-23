@@ -1,123 +1,71 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>https://briantsaunders.github.io/tags/ansible/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/frrouting/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/posts/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/vagrant/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/posts/2021/02/working-with-the-ansible-local-provisioner-for-vagrant-boxes/</loc>
     <lastmod>2021-02-05T15:47:05-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/api/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/flask/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/microservice/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/posts/2019/08/my-flask-api-setup/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/python/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/rest/</loc>
     <lastmod>2019-08-19T20:02:49-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/</loc>
     <lastmod>2019-05-25T08:55:50-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/linux/</loc>
     <lastmod>2019-05-25T08:55:50-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/network/</loc>
     <lastmod>2019-05-25T08:55:50-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/vrf/</loc>
     <lastmod>2019-05-25T08:55:50-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/bgp/</loc>
     <lastmod>2019-05-07T05:28:48-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/</loc>
     <lastmod>2019-05-07T05:28:48-05:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/tags/vxlan/</loc>
     <lastmod>2019-05-07T05:28:48-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://briantsaunders.github.io/about/</loc>
-    <lastmod>2019-02-28T17:18:54-06:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/archives/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://briantsaunders.github.io/categories/</loc>
+  </url><url>
+    <loc>https://briantsaunders.github.io/search/</loc>
   </url>
-  
-  <url>
-    <loc>https://briantsaunders.github.io/series/</loc>
-  </url>
-  
 </urlset>

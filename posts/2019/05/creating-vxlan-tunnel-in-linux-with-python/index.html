@@ -1,133 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Creating a VXLAN Tunnel in Linux with Python - Brian T. Saunders</title>
-  <meta property="og:title" content="Creating a VXLAN Tunnel in Linux with Python - Brian T. Saunders" />
-  <meta name="twitter:title" content="Creating a VXLAN Tunnel in Linux with Python - Brian T. Saunders" />
-  <meta name="description" content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github.">
-  <meta property="og:description" content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github.">
-  <meta name="twitter:description" content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python …">
-  <meta name="author" content="Brian Saunders"/>
-  <link rel='icon' type='image/x-icon' href="https://briantsaunders.github.io/img/favicon.ico" />
-  <meta property="og:site_name" content="Brian T. Saunders" />
-  <meta property="og:url" content="https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/" />
-  <meta property="og:type" content="article" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.80.0" /><meta itemprop="name" content="Creating a VXLAN Tunnel in Linux with Python">
-<meta itemprop="description" content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github.">
-<meta itemprop="datePublished" content="2019-05-07T05:28:48-05:00" />
-<meta itemprop="dateModified" content="2019-05-07T05:28:48-05:00" />
-<meta itemprop="wordCount" content="673">
-
-
-
-<meta itemprop="keywords" content="vxlan,python,linux,network,frrouting,bgp," />
-
-
-  <link rel="stylesheet" href="/css/style.css" media="all" />
-  <link rel="stylesheet" href="/css/syntax.css" media="all" />
-  <link rel="stylesheet" href="/css/custom.css" media="all" />
-
-  <script src="/js/script.js"></script>
-  <script src="/js/custom.js"></script>
-  <script defer src="/js/fontawesome.js"></script>
-</head>
-
-<body>
-
-<header class="site-header">
-  <nav class="site-navi">
-    <h1 class="site-title"><a href="/">Brian T. Saunders</a></h1>
-    <ul class="site-navi-items">
-      <li class="site-navi-item-tags"><a href="/tags/" title="Tags">Tags</a></li>
-      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
-      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
-    </ul>
-  </nav>
-</header>
-<hr class="site-header-bottom">
-
-  <div class="main" role="main">
-    <article class="article">
-      
-      
-      <h1 class="article-title">Creating a VXLAN Tunnel in Linux with Python</h1>
-      
-      <hr class="article-title-bottom">
-      <ul class="article-meta">
-        <li class="article-meta-date"><time>May 7, 2019</time></li>
-        <li class="article-meta-tags">
-          <a href="/tags/vxlan/">
-            <i class="fas fa-tag"></i>
-            vxlan
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/python/">
-            <i class="fas fa-tag"></i>
-            python
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/linux/">
-            <i class="fas fa-tag"></i>
-            linux
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/network/">
-            <i class="fas fa-tag"></i>
-            network
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/frrouting/">
-            <i class="fas fa-tag"></i>
-            frrouting
-          </a>&nbsp;
-        </li>
-        <li class="article-meta-tags">
-          <a href="/tags/bgp/">
-            <i class="fas fa-tag"></i>
-            bgp
-          </a>&nbsp;
-        </li>
-      </ul>
-      
-<aside class="toc">
-  <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#vxlan-tunnel-cli-commands">VXLAN Tunnel CLI Commands</a></li>
-        <li><a href="#vxlan-tunnel-in-python">VXLAN Tunnel in Python</a></li>
-        <li><a href="#validating-vxlan-tunnel">Validating VXLAN Tunnel</a></li>
-        <li><a href="#helpful-references">Helpful References</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-</aside>
-      <p>In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in <a href="https://github.com/briantsaunders/linux-vxlan-tunnel-example-python-script">github</a>.</p>
-<p>Here&rsquo;s our environment and we&rsquo;re going to form a VXLAN tunnel between the site1router and site2router.</p>
-<p><img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_environment.PNG" alt="Environment"></p>
-<p>This will allow the hosts connected to eth2 talk to each other as if they are directly connected.  In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational.  The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other.  Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.</p>
-<h3 id="prerequisites">Prerequisites</h3>
-<p>On the linux host that will be forming the VXLAN tunnel you need to make sure you have the following installed.</p>
-<ul>
-<li><a href="https://wiki.debian.org/BridgeNetworkConnections#Installing_the_software">bridge utils</a></li>
-<li><a href="https://github.com/svinota/pyroute2">pyroute2</a></li>
-</ul>
-<p>Pyroute2 is the python package that is going to allow for the creation of the VXLAN tunnels.  It&rsquo;s very useful for interacting with the linux network stack with python.</p>
-<p>On the interface that you are going to bridge with the VXLAN interface you need to ensure that promiscuous mode is enabled within the hypervisor.  In our vagrant environment this is enabled for you.</p>
-<h3 id="vxlan-tunnel-cli-commands">VXLAN Tunnel CLI Commands</h3>
-<p>Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure.  We&rsquo;re going to be using our vagrant environment as the example for the commands to use.</p>
-<h4 id="site1router">site1router</h4>
-<p>Create</p>
-<pre><code>sudo ip link set eth2 up
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Creating a VXLAN Tunnel in Linux with Python | briantsaunders blog</title><meta name=keywords content="vxlan,python,linux,network,frrouting,bgp"><meta name=description content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github."><meta name=author content="Me"><link rel=canonical href=https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/><link crossorigin=anonymous href=/assets/css/stylesheet.min.ec8da366ca2fb647537ccb7a8f6fa5b4e9cd3c7a0d3171dd2d3baad1e49c8bfc.css integrity="sha256-7I2jZsovtkdTfMt6j2+ltOnNPHoNMXHdLTuq0eSci/w=" rel="preload stylesheet" as=style><script defer crossorigin=anonymous src=/assets/js/highlight.min.2840b7fccd34145847db71a290569594bdbdb00047097f75d6495d162f5d7dff.js integrity="sha256-KEC3/M00FFhH23GikFaVlL29sABHCX911kldFi9dff8=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=https://briantsaunders.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://briantsaunders.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://briantsaunders.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://briantsaunders.github.io/apple-touch-icon.png><link rel=mask-icon href=https://briantsaunders.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(e,o,i,a,t,n,s){e.GoogleAnalyticsObject=t,e[t]=e[t]||function(){(e[t].q=e[t].q||[]).push(arguments)},e[t].l=1*new Date,n=o.createElement(i),s=o.getElementsByTagName(i)[0],n.async=1,n.src=a,s.parentNode.insertBefore(n,s)}(window,document,"script","https://www.google-analytics.com/analytics.js","ga"),ga("create","UA-40258484-2","auto"),ga("send","pageview"))</script><meta property="og:title" content="Creating a VXLAN Tunnel in Linux with Python"><meta property="og:description" content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github."><meta property="og:type" content="article"><meta property="og:url" content="https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-05-07T05:28:48-05:00"><meta property="article:modified_time" content="2019-05-07T05:28:48-05:00"><meta property="og:site_name" content="briantsaunders blog"><meta name=twitter:card content="summary"><meta name=twitter:title content="Creating a VXLAN Tunnel in Linux with Python"><meta name=twitter:description content="In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python.  To follow along I have created a vagrant environment and example python script in github."><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://briantsaunders.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Creating a VXLAN Tunnel in Linux with Python","item":"https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Creating a VXLAN Tunnel in Linux with Python","name":"Creating a VXLAN Tunnel in Linux with Python","description":"In this post I\u0026rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python. To follow along I have created a vagrant environment and example python script in github.\n","keywords":["vxlan","python","linux","network","frrouting","bgp"],"articleBody":"In this post I’m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python. To follow along I have created a vagrant environment and example python script in github.\nHere’s our environment and we’re going to form a VXLAN tunnel between the site1router and site2router.\nThis will allow the hosts connected to eth2 talk to each other as if they are directly connected. In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational. The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other. Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.\nPrerequisites On the linux host that will be forming the VXLAN tunnel you need to make sure you have the following installed.\n bridge utils pyroute2  Pyroute2 is the python package that is going to allow for the creation of the VXLAN tunnels. It’s very useful for interacting with the linux network stack with python.\nOn the interface that you are going to bridge with the VXLAN interface you need to ensure that promiscuous mode is enabled within the hypervisor. In our vagrant environment this is enabled for you.\nVXLAN Tunnel CLI Commands Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure. We’re going to be using our vagrant environment as the example for the commands to use.\nsite1router Create\nsudo ip link set eth2 up sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.2 remote 192.168.0.5 nolearning sudo ip link set vxlan100 up sudo brctl addbr br100 sudo brctl addif br100 vxlan100 sudo brctl addif br100 eth2 sudo brctl stp br100 off sudo ip link set br100 up Delete\nsudo ip link delete vxlan100 sudo ip link delete br100 site2router Create\nsudo ip link set eth2 up sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.5 remote 192.168.0.2 nolearning sudo ip link set vxlan100 up sudo brctl addbr br100 sudo brctl addif br100 vxlan100 sudo brctl addif br100 eth2 sudo brctl stp br100 off sudo ip link set br100 up Delete\nsudo ip link delete vxlan100 sudo ip link delete br100 VXLAN Tunnel in Python When working with the IPDB module within pyroute2 you need to commit your changes. You can leverage a context manager to automatically commit the code at the end. In this example we are going to manually commit our changes after each change. This code is essentially the equivalent of the CLI commands referenced above.\nsite1router Create\nfrom pyroute2 import IPDB  ipdb = IPDB() ipdb.interfaces[\"eth2\"].up() ipdb.interfaces[\"eth2\"].commit() ipdb.create(  kind=\"vxlan\",  ifname=f\"vxlan100\",  vxlan_id=100,  vxlan_learning=False,  vxlan_local=\"192.168.0.2\",  vxlan_group=\"192.168.0.5\" ) ipdb.interfaces[\"vxlan100\"].commit() ipdb.interfaces[\"vxlan100\"].up() ipdb.interfaces[\"vxlan100\"].commit() ipdb.create(kind=\"bridge\", ifname=\"br100\") ipdb.interfaces[\"br100\"].add_port(ipdb.interfaces[\"vxlan100\"].index) ipdb.interfaces[\"br100\"].add_port(ipdb.interfaces[\"eth2\"].index) ipdb.interfaces[\"br100\"].up() ipdb.interfaces[\"br100\"].commit() Delete\nfrom pyroute2 import IPDB  ipdb = IPDB() ipdb.interfaces[\"vlan100\"].remove() ipdb.interfaces[\"br100\"].remove() ipdb.commit() site2router Create\nfrom pyroute2 import IPDB  ipdb = IPDB() ipdb.interfaces[\"eth2\"].up() ipdb.interfaces[\"eth2\"].commit() ipdb.create(  kind=\"vxlan\",  ifname=f\"vxlan100\",  vxlan_id=100,  vxlan_learning=False,  vxlan_local=\"192.168.0.5\",  vxlan_group=\"192.168.0.2\" ) ipdb.interfaces[\"vxlan100\"].commit() ipdb.interfaces[\"vxlan100\"].up() ipdb.interfaces[\"vxlan100\"].commit() ipdb.create(kind=\"bridge\", ifname=\"br100\") ipdb.interfaces[\"br100\"].add_port(ipdb.interfaces[\"vxlan100\"].index) ipdb.interfaces[\"br100\"].add_port(ipdb.interfaces[\"eth2\"].index) ipdb.interfaces[\"br100\"].up() ipdb.interfaces[\"br100\"].commit() Delete\nfrom pyroute2 import IPDB  ipdb = IPDB() ipdb.interfaces[\"vlan100\"].remove() ipdb.interfaces[\"br100\"].remove() ipdb.commit() Validating VXLAN Tunnel Ping site1server to site2server\nvagrant@site1server:~$ ping 172.16.0.11 PING 172.16.0.11 (172.16.0.11) 56(84) bytes of data. 64 bytes from 172.16.0.11: icmp_seq=1 ttl=64 time=1.24 ms ^C --- 172.16.0.11 ping statistics --- 1 packets transmitted, 1 received, 0% packet loss, time 0ms rtt min/avg/max/mdev = 1.246/1.246/1.246/0.000 ms vagrant@site1server:~$ PCAP site1router eth2 interface site1router vxlan100 interface site1router br100 interface site1router eth1 interface Helpful References I couldn’t have created this post without the following helpful sites.\n Vincent Bernat Linux \u0026 VXLAN Joe Julian How To Configure Linux VXLANs ","wordCount":"619","inLanguage":"en","datePublished":"2019-05-07T05:28:48-05:00","dateModified":"2019-05-07T05:28:48-05:00","author":{"@type":"Person","name":"Me"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://briantsaunders.github.io/posts/2019/05/creating-vxlan-tunnel-in-linux-with-python/"},"publisher":{"@type":"Organization","name":"briantsaunders blog","logo":{"@type":"ImageObject","url":"https://briantsaunders.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://briantsaunders.github.io/ accesskey=h title="briantsaunders blog (Alt + H)">briantsaunders blog</a>
+<span class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></span></div><ul id=menu><li><a href=https://briantsaunders.github.io/archives title=Archive><span>Archive</span></a></li><li><a href=https://briantsaunders.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://briantsaunders.github.io/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://briantsaunders.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://briantsaunders.github.io/posts/>Posts</a></div><h1 class=post-title>Creating a VXLAN Tunnel in Linux with Python</h1><div class=post-meta><span title="2019-05-07 05:28:48 -0500 CDT">May 7, 2019</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Me</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><ul><li><a href=#prerequisites aria-label=Prerequisites>Prerequisites</a></li><li><a href=#vxlan-tunnel-cli-commands aria-label="VXLAN Tunnel CLI Commands">VXLAN Tunnel CLI Commands</a><ul><li><a href=#site1router aria-label=site1router>site1router</a></li><li><a href=#site2router aria-label=site2router>site2router</a></li></ul></li><li><a href=#vxlan-tunnel-in-python aria-label="VXLAN Tunnel in Python">VXLAN Tunnel in Python</a><ul><li><a href=#site1router-1 aria-label=site1router>site1router</a></li><li><a href=#site2router-1 aria-label=site2router>site2router</a></li></ul></li><li><a href=#validating-vxlan-tunnel aria-label="Validating VXLAN Tunnel">Validating VXLAN Tunnel</a><ul><li><a href=#ping aria-label=Ping>Ping</a></li><li><a href=#pcap aria-label=PCAP>PCAP</a></li></ul></li><li><a href=#helpful-references aria-label="Helpful References">Helpful References</a></li></ul></div></details></div><div class=post-content><p>In this post I&rsquo;m going to talk about how to create a point to point VXLAN tunnel between two linux hosts with Python. To follow along I have created a vagrant environment and example python script in <a href=https://github.com/briantsaunders/linux-vxlan-tunnel-example-python-script>github</a>.</p><p>Here&rsquo;s our environment and we&rsquo;re going to form a VXLAN tunnel between the site1router and site2router.</p><p><img loading=lazy src=/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_environment.PNG alt=Environment></p><p>This will allow the hosts connected to eth2 talk to each other as if they are directly connected. In order to form the VXLAN tunnel overlay the underlay needs to be setup and routing needs to be operational. The interfaces that will be used as the VXLAN Tunnel Endpoint (VTEP) between the two linux hosts need to be able to reach each other. Our site routers are eBGP peering with an isp router and directly connected interfaces are being redistributed into the underlay.</p><h3 id=prerequisites>Prerequisites<a hidden class=anchor aria-hidden=true href=#prerequisites>#</a></h3><p>On the linux host that will be forming the VXLAN tunnel you need to make sure you have the following installed.</p><ul><li><a href=https://wiki.debian.org/BridgeNetworkConnections#Installing_the_software>bridge utils</a></li><li><a href=https://github.com/svinota/pyroute2>pyroute2</a></li></ul><p>Pyroute2 is the python package that is going to allow for the creation of the VXLAN tunnels. It&rsquo;s very useful for interacting with the linux network stack with python.</p><p>On the interface that you are going to bridge with the VXLAN interface you need to ensure that promiscuous mode is enabled within the hypervisor. In our vagrant environment this is enabled for you.</p><h3 id=vxlan-tunnel-cli-commands>VXLAN Tunnel CLI Commands<a hidden class=anchor aria-hidden=true href=#vxlan-tunnel-cli-commands>#</a></h3><p>Before we show how to set this up within python lets review the CLI commands that you would enter if you wanted to manually configure. We&rsquo;re going to be using our vagrant environment as the example for the commands to use.</p><h4 id=site1router>site1router<a hidden class=anchor aria-hidden=true href=#site1router>#</a></h4><p>Create</p><pre tabindex=0><code>sudo ip link set eth2 up
 sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.2 remote 192.168.0.5 nolearning
 sudo ip link set vxlan100 up
 sudo brctl addbr br100
@@ -135,12 +8,9 @@ sudo brctl addif br100 vxlan100
 sudo brctl addif br100 eth2
 sudo brctl stp br100 off
 sudo ip link set br100 up
-</code></pre><p>Delete</p>
-<pre><code>sudo ip link delete vxlan100
+</code></pre><p>Delete</p><pre tabindex=0><code>sudo ip link delete vxlan100
 sudo ip link delete br100
-</code></pre><h4 id="site2router">site2router</h4>
-<p>Create</p>
-<pre><code>sudo ip link set eth2 up
+</code></pre><h4 id=site2router>site2router<a hidden class=anchor aria-hidden=true href=#site2router>#</a></h4><p>Create</p><pre tabindex=0><code>sudo ip link set eth2 up
 sudo ip link add vxlan100 type vxlan id 100 local 192.168.0.5 remote 192.168.0.2 nolearning
 sudo ip link set vxlan100 up
 sudo brctl addbr br100
@@ -148,153 +18,63 @@ sudo brctl addif br100 vxlan100
 sudo brctl addif br100 eth2
 sudo brctl stp br100 off
 sudo ip link set br100 up
-</code></pre><p>Delete</p>
-<pre><code>sudo ip link delete vxlan100
+</code></pre><p>Delete</p><pre tabindex=0><code>sudo ip link delete vxlan100
 sudo ip link delete br100
-</code></pre><h3 id="vxlan-tunnel-in-python">VXLAN Tunnel in Python</h3>
-<p>When working with the IPDB module within pyroute2 you need to commit your changes.  You can leverage a context manager to automatically commit the code at the end.  In this example we are going to manually commit our changes after each change.  This code is essentially the equivalent of the CLI commands referenced above.</p>
-<h4 id="site1router-1">site1router</h4>
-<p>Create</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vxlan&#34;</span><span class="p">,</span>
-    <span class="n">ifname</span><span class="o">=</span><span class="n">f</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">,</span>
-    <span class="n">vxlan_id</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">vxlan_learning</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-    <span class="n">vxlan_local</span><span class="o">=</span><span class="s2">&#34;192.168.0.2&#34;</span><span class="p">,</span>
-    <span class="n">vxlan_group</span><span class="o">=</span><span class="s2">&#34;192.168.0.5&#34;</span>
-<span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;bridge&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;br100&#34;</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>Delete</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><h4 id="site2router-1">site2router</h4>
-<p>Create</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&#34;vxlan&#34;</span><span class="p">,</span>
-    <span class="n">ifname</span><span class="o">=</span><span class="n">f</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">,</span>
-    <span class="n">vxlan_id</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">vxlan_learning</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-    <span class="n">vxlan_local</span><span class="o">=</span><span class="s2">&#34;192.168.0.5&#34;</span><span class="p">,</span>
-    <span class="n">vxlan_group</span><span class="o">=</span><span class="s2">&#34;192.168.0.2&#34;</span>
-<span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&#34;bridge&#34;</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&#34;br100&#34;</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vxlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;eth2&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">up</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>Delete</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pyroute2</span> <span class="kn">import</span> <span class="n">IPDB</span>
-
-<span class="n">ipdb</span> <span class="o">=</span> <span class="n">IPDB</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;vlan100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="s2">&#34;br100&#34;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-<span class="n">ipdb</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="validating-vxlan-tunnel">Validating VXLAN Tunnel</h3>
-<h4 id="ping">Ping</h4>
-<p>site1server to site2server</p>
-<pre><code>vagrant@site1server:~$ ping 172.16.0.11
+</code></pre><h3 id=vxlan-tunnel-in-python>VXLAN Tunnel in Python<a hidden class=anchor aria-hidden=true href=#vxlan-tunnel-in-python>#</a></h3><p>When working with the IPDB module within pyroute2 you need to commit your changes. You can leverage a context manager to automatically commit the code at the end. In this example we are going to manually commit our changes after each change. This code is essentially the equivalent of the CLI commands referenced above.</p><h4 id=site1router-1>site1router<a hidden class=anchor aria-hidden=true href=#site1router-1>#</a></h4><p>Create</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ipdb <span style=color:#f92672>=</span> IPDB()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>    kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vxlan&#34;</span>,
+</span></span><span style=display:flex><span>    ifname<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;vxlan100&#34;</span>,
+</span></span><span style=display:flex><span>    vxlan_id<span style=color:#f92672>=</span><span style=color:#ae81ff>100</span>,
+</span></span><span style=display:flex><span>    vxlan_learning<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>,
+</span></span><span style=display:flex><span>    vxlan_local<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;192.168.0.2&#34;</span>,
+</span></span><span style=display:flex><span>    vxlan_group<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;192.168.0.5&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>create(kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;bridge&#34;</span>, ifname<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;br100&#34;</span>)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span></code></pre></div><p>Delete</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ipdb <span style=color:#f92672>=</span> IPDB()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vlan100&#34;</span>]<span style=color:#f92672>.</span>remove()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>remove()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>commit()
+</span></span></code></pre></div><h4 id=site2router-1>site2router<a hidden class=anchor aria-hidden=true href=#site2router-1>#</a></h4><p>Create</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ipdb <span style=color:#f92672>=</span> IPDB()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>    kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;vxlan&#34;</span>,
+</span></span><span style=display:flex><span>    ifname<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;vxlan100&#34;</span>,
+</span></span><span style=display:flex><span>    vxlan_id<span style=color:#f92672>=</span><span style=color:#ae81ff>100</span>,
+</span></span><span style=display:flex><span>    vxlan_learning<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>,
+</span></span><span style=display:flex><span>    vxlan_local<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;192.168.0.5&#34;</span>,
+</span></span><span style=display:flex><span>    vxlan_group<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;192.168.0.2&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>create(kind<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;bridge&#34;</span>, ifname<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;br100&#34;</span>)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vxlan100&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>add_port(ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;eth2&#34;</span>]<span style=color:#f92672>.</span>index)
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>up()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>commit()
+</span></span></code></pre></div><p>Delete</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> pyroute2 <span style=color:#f92672>import</span> IPDB
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ipdb <span style=color:#f92672>=</span> IPDB()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;vlan100&#34;</span>]<span style=color:#f92672>.</span>remove()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>interfaces[<span style=color:#e6db74>&#34;br100&#34;</span>]<span style=color:#f92672>.</span>remove()
+</span></span><span style=display:flex><span>ipdb<span style=color:#f92672>.</span>commit()
+</span></span></code></pre></div><h3 id=validating-vxlan-tunnel>Validating VXLAN Tunnel<a hidden class=anchor aria-hidden=true href=#validating-vxlan-tunnel>#</a></h3><h4 id=ping>Ping<a hidden class=anchor aria-hidden=true href=#ping>#</a></h4><p>site1server to site2server</p><pre tabindex=0><code>vagrant@site1server:~$ ping 172.16.0.11
 PING 172.16.0.11 (172.16.0.11) 56(84) bytes of data.
 64 bytes from 172.16.0.11: icmp_seq=1 ttl=64 time=1.24 ms
 ^C
@@ -302,58 +82,11 @@ PING 172.16.0.11 (172.16.0.11) 56(84) bytes of data.
 1 packets transmitted, 1 received, 0% packet loss, time 0ms
 rtt min/avg/max/mdev = 1.246/1.246/1.246/0.000 ms
 vagrant@site1server:~$
-</code></pre><h4 id="pcap">PCAP</h4>
-<p>site1router eth2 interface
-<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth2.PNG" alt="eth2"></p>
-<p>site1router vxlan100 interface
-<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG" alt="vxlan100"></p>
-<p>site1router br100 interface
-<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG" alt="br100"></p>
-<p>site1router eth1 interface
-<img src="/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth1.PNG" alt="eth1"></p>
-<h3 id="helpful-references">Helpful References</h3>
-<p>I couldn&rsquo;t have created this post without the following helpful sites.</p>
-<ul>
-<li><a href="https://vincent.bernat.ch/en/blog/2017-vxlan-linux">Vincent Bernat Linux &amp; VXLAN</a></li>
-<li><a href="https://joejulian.name/post/how-to-configure-linux-vxlans-with-multiple-unicast-endpoints/">Joe Julian How To Configure Linux VXLANs</a></li>
-</ul>
-    </article>
-
-    
-
-
-    <ul class="pager article-pager">
-      <li class="pager-newer">
-          <a href="/posts/2019/05/creating-vrfs-in-linux-with-python/" data-toggle="tooltip" data-placement="top" title="Creating Vrfs in Linux With Python">&lt; Newer</a>
-      </li>
-      <li class="pager-older pager-noitem">Older &gt;</li>
-    </ul>
-  </div>
-
-
-<div class="site-footer">
-  <div class="copyright">&copy; Copyright 2019 Brian T. Saunders</div>
-  <ul class="site-footer-items">
-    <li class="site-footer-item-about"><a href="/about/" title="About">About</a></li>
-  </ul>
-  <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
-  </div>
-</div>
-
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-	ga('create', 'UA-40258484-2', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-
-
-</body>
-</html>
+</code></pre><h4 id=pcap>PCAP<a hidden class=anchor aria-hidden=true href=#pcap>#</a></h4><p>site1router eth2 interface
+<img loading=lazy src=/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth2.PNG alt=eth2></p><p>site1router vxlan100 interface
+<img loading=lazy src=/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_vxlan100.PNG alt=vxlan100></p><p>site1router br100 interface
+<img loading=lazy src=/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_br100.PNG alt=br100></p><p>site1router eth1 interface
+<img loading=lazy src=/img/2019/05/creating_vxlan_tunnel_in_linux_with_python_eth1.PNG alt=eth1></p><h3 id=helpful-references>Helpful References<a hidden class=anchor aria-hidden=true href=#helpful-references>#</a></h3><p>I couldn&rsquo;t have created this post without the following helpful sites.</p><ul><li><a href=https://vincent.bernat.ch/en/blog/2017-vxlan-linux>Vincent Bernat Linux & VXLAN</a></li><li><a href=https://joejulian.name/post/how-to-configure-linux-vxlans-with-multiple-unicast-endpoints/>Joe Julian How To Configure Linux VXLANs</a></li></ul></div><footer class=post-footer><ul class=post-tags><li><a href=https://briantsaunders.github.io/tags/vxlan/>vxlan</a></li><li><a href=https://briantsaunders.github.io/tags/python/>python</a></li><li><a href=https://briantsaunders.github.io/tags/linux/>linux</a></li><li><a href=https://briantsaunders.github.io/tags/network/>network</a></li><li><a href=https://briantsaunders.github.io/tags/frrouting/>frrouting</a></li><li><a href=https://briantsaunders.github.io/tags/bgp/>bgp</a></li></ul><nav class=paginav><a class=prev href=https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/><span class=title>« Prev</span><br><span>Creating VRFs in Linux With Python</span></a></nav><div class=share-buttons><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on twitter" href="https://twitter.com/intent/tweet/?text=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f&hashtags=vxlan%2cpython%2clinux%2cnetwork%2cfrrouting%2cbgp"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f&title=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python&summary=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python&source=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f&title=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on whatsapp" href="https://api.whatsapp.com/send?text=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python%20-%20https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share Creating a VXLAN Tunnel in Linux with Python on telegram" href="https://telegram.me/share/url?text=Creating%20a%20VXLAN%20Tunnel%20in%20Linux%20with%20Python&url=https%3a%2f%2fbriantsaunders.github.io%2fposts%2f2019%2f05%2fcreating-vxlan-tunnel-in-linux-with-python%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></div></footer></article></main><footer class=footer><span>&copy; 2022 <a href=https://briantsaunders.github.io/>briantsaunders blog</a></span>
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg></a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(t){t.preventDefault();var e=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView({behavior:"smooth"}),e==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${e}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(t=>{const n=t.parentNode.parentNode,e=document.createElement("button");e.classList.add("copy-code"),e.innerHTML="copy";function s(){e.innerHTML="copied!",setTimeout(()=>{e.innerHTML="copy"},2e3)}e.addEventListener("click",o=>{if("clipboard"in navigator){navigator.clipboard.writeText(t.textContent),s();return}const e=document.createRange();e.selectNodeContents(t);const n=window.getSelection();n.removeAllRanges(),n.addRange(e);try{document.execCommand("copy"),s()}catch(e){}n.removeRange(e)}),n.classList.contains("highlight")?n.appendChild(e):n.parentNode.firstChild==n||(t.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?t.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(e):t.parentNode.appendChild(e))})</script></body></html>

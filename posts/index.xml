@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Posts on Brian T. Saunders</title>
+    <title>Posts on briantsaunders blog</title>
     <link>https://briantsaunders.github.io/posts/</link>
-    <description>Recent content in Posts on Brian T. Saunders</description>
+    <description>Recent content in Posts on briantsaunders blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright>&amp;copy; Copyright 2019 Brian T. Saunders</copyright>
     <lastBuildDate>Fri, 05 Feb 2021 15:47:05 -0600</lastBuildDate><atom:link href="https://briantsaunders.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Working with the Ansible Local Provisioner for Vagrant Boxes</title>
@@ -28,7 +26,7 @@ It&amp;rsquo;s considered a micro framework, so it comes with the bare bones to 
     </item>
     
     <item>
-      <title>Creating Vrfs in Linux With Python</title>
+      <title>Creating VRFs in Linux With Python</title>
       <link>https://briantsaunders.github.io/posts/2019/05/creating-vrfs-in-linux-with-python/</link>
       <pubDate>Sat, 25 May 2019 08:55:50 -0500</pubDate>
       
