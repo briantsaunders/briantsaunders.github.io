@@ -5,7 +5,34 @@
     <link>https://briantsaunders.github.io/tags/</link>
     <description>Recent content in Tags on briantsaunders blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Fri, 05 Feb 2021 15:47:05 -0600</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 04 Jan 2023 16:10:46 +0000</lastBuildDate><atom:link href="https://briantsaunders.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>packer</title>
+      <link>https://briantsaunders.github.io/tags/packer/</link>
+      <pubDate>Wed, 04 Jan 2023 16:10:46 +0000</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/packer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>vagrant</title>
+      <link>https://briantsaunders.github.io/tags/vagrant/</link>
+      <pubDate>Wed, 04 Jan 2023 16:10:46 +0000</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/vagrant/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>virtualbox</title>
+      <link>https://briantsaunders.github.io/tags/virtualbox/</link>
+      <pubDate>Wed, 04 Jan 2023 16:10:46 +0000</pubDate>
+      
+      <guid>https://briantsaunders.github.io/tags/virtualbox/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>ansible</title>
       <link>https://briantsaunders.github.io/tags/ansible/</link>
@@ -21,15 +48,6 @@
       <pubDate>Fri, 05 Feb 2021 15:47:05 -0600</pubDate>
       
       <guid>https://briantsaunders.github.io/tags/frrouting/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>vagrant</title>
-      <link>https://briantsaunders.github.io/tags/vagrant/</link>
-      <pubDate>Fri, 05 Feb 2021 15:47:05 -0600</pubDate>
-      
-      <guid>https://briantsaunders.github.io/tags/vagrant/</guid>
       <description></description>
     </item>
     
